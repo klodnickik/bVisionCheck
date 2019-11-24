@@ -50,7 +50,15 @@ This microservice is used to upload picture to Cloud Storage and send message to
 
 **Build of docker image**
 
-docker build -t eu.gcr.io/bvisioncheck/bgetpicture:v0.1 .
+    docker build -t eu.gcr.io/bvisioncheck/bgetpicture:v0.1 .
+
+    docker push eu.gcr.io/bvisioncheck/bgetpicture:v0.1
+
+**Create Cloud Run instance**
+
+    gcloud run deploy --image eu.gcr.io/bvisioncheck/bgetpicture:v0.2 --platform managed --region europe-west1 --max-instances 2 --service-account sa-cloud-run@bvisioncheck.iam.gserviceaccount.com --allow-unauthenticated --set-env-vars PROJECT_ID=bvisioncheck,STORAGE_BUCKET_NAME=bpictures,TOPIC_NAME=uploaded-pictures  bgetpicture
+
+
 
 ## Change logs
 
@@ -58,6 +66,8 @@ docker build -t eu.gcr.io/bvisioncheck/bgetpicture:v0.1 .
 - README updated
 - Application architecture diagram
 
+### 0.1 created bGetPicture microservice
+- created first microservice and configuration file (bGetPicture v.0.1)
 
 
 
