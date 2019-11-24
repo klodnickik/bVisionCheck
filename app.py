@@ -1,1 +1,0 @@
-from bVisionCheck import app
