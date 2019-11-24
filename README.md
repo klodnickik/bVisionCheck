@@ -30,6 +30,28 @@ The application uses Google native services like:
     `gcloud services enable vision.googleapis.com`
 
 
+## Others
+
+### Configuration of credentials when you test and develop application locally
+1. Create service account
+2. Configure local environment variable
+
+`export GOOGLE_APPLICATION_CREDENTIALS="/path/to/keyfile.json"`
+
+## Microservice gGetPicture
+
+This microservice is used to upload picture to Cloud Storage and send message to Pub/Sub topic.
+
+**Environemnt variables:**
+- SECRET_KEY 
+- PROJECT_ID 
+- TOPIC_NAME 
+- STORAGE_BUCKET_NAME 
+
+**Build of docker image**
+
+docker build -t eu.gcr.io/bvisioncheck/bgetpicture:v0.1 .
+
 ## Change logs
 
 ### 0.0.1 initial configuration
