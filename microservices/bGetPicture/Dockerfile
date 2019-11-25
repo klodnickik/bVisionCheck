@@ -8,6 +8,7 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && pip install gunicorn
 
 COPY app app
+RUN mkdir tmp
 
 COPY bgetpicture.py config.py ./
 

@@ -56,7 +56,7 @@ This microservice is used to upload picture to Cloud Storage and send message to
 
 **Create Cloud Run instance**
 
-    gcloud run deploy --image eu.gcr.io/bvisioncheck/bgetpicture:v0.2 --platform managed --region europe-west1 --max-instances 2 --service-account sa-cloud-run@bvisioncheck.iam.gserviceaccount.com --allow-unauthenticated --set-env-vars PROJECT_ID=bvisioncheck,STORAGE_BUCKET_NAME=bpictures,TOPIC_NAME=uploaded-pictures  bgetpicture
+gcloud run deploy --image eu.gcr.io/bvisioncheck/bgetpicture:v0.2 --platform managed --region europe-west1 --max-instances 2 --service-account sa-cloud-run@bvisioncheck.iam.gserviceaccount.com --allow-unauthenticated --set-env-vars PROJECT_ID=bvisioncheck,STORAGE_BUCKET_NAME=bpictures,TOPIC_NAME=uploaded-pictures  bgetpicture
 
 
 
