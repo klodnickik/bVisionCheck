@@ -66,8 +66,16 @@ gcloud run deploy --image eu.gcr.io/bvisioncheck/bgetpicture:v0.2 --platform man
 - README updated
 - Application architecture diagram
 
-### 0.1 created bGetPicture microservice
+### 0.1 (11/25/2019) created bGetPicture microservice
 - created first microservice and configuration file (bGetPicture v.0.1)
+
+### 0.2 (11/26/2019) created draft of bAnalyzePicture
+- created draft of bAnalyzePicture microservice
+  - connected to Vision AI
+  - connected to Cloud Storage
+  - connected to output Pub/Sub
+- created supporitgn service bListener
+ - microservice is connected to Stackdriver logs and is used to support development and tests
 
 
 
