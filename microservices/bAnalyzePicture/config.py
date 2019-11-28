@@ -4,10 +4,16 @@ load_dotenv()
 import os
 
 class Config(object):
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'this-is-my-key'
+    SECRET_KEY = os.environ.get('TOKEN')
     PROJECT_ID = os.environ.get('PROJECT_ID')
     TOPIC_NAME = os.environ.get('TOPIC_NAME')
+    TOPIC_NAME_OUTPUT = os.environ.get('TOPIC_NAME_OUTPUT')
+    DETECTION_SCORE = os.environ.get('DETECTION_SCORE')
+    LABEL_TO_DETECT = os.environ.get('LABEL_TO_DETECT')
+    TOKEN = os.environ.get('TOKEN')
     STORAGE_BUCKET_NAME = os.environ.get('STORAGE_BUCKET_NAME')
+    
+    
     UPLOAD_FOLDER = 'tmp'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 

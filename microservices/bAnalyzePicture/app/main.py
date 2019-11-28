@@ -1,41 +1,46 @@
 import os, io
 import urllib.request
-#from app import app
+from app import app
 from flask import Flask, flash, request, redirect, render_template
-
+import json
+import base64
 
 from google.cloud import storage
 from google.cloud import pubsub_v1
 from google.cloud import vision
 from google.cloud.vision import types
+import google.cloud.logging
 
+client = google.cloud.logging.Client()
+client.setup_logging()
+import logging
 
-#project_id = app.config['PROJECT_ID']
-#storage_bucket_name = app.config['STORAGE_BUCKET_NAME']
-#topic_name = app.config['TOPIC_NAME']
-#secret_key = app.config['SECRET_KEY']
-#upload_folder = app.config['UPLOAD_FOLDER']
-#max_content_length = app.config['MAX_CONTENT_LENGTH']
+project_id = app.config['PROJECT_ID']
+storage_bucket_name = app.config['STORAGE_BUCKET_NAME']
+topic_name = app.config['TOPIC_NAME']
+topic_name_output = app.config['TOPIC_NAME_OUTPUT']
+token = app.config['TOKEN']
+upload_folder = app.config['UPLOAD_FOLDER']
+label_to_detect = app.config['LABEL_TO_DETECT']
+detection_score = float(app.config['DETECTION_SCORE'])
 
-## print configuration
+## send configuration to logs
 
-#print ("bVisionCheck starting ...")
-#print ("configuration details:")
-#print ("- PROJECT_ID: {}".format(project_id))
-#print ("- STORAGE_BUCKET_NAME: {}".format(storage_bucket_name))
-#print ("- TOPIC_NAME: {}".format(topic_name))
-#print ("- SECRET_KEY: {}".format(secret_key))
-#print ("- UPLOAD_FOLDER: {}".format(upload_folder))
-#print ("- MAX_CONTENT_LENGTH: {}".format(max_content_length))
+logging.warning("vAnalyzePicture starting ... variable values")
+logging.warning("- PROJECT_ID: {}".format(project_id))
+logging.warning("- STORAGE_BUCKET_NAME: {}".format(storage_bucket_name))
+logging.warning("- TOPIC_NAME: {}".format(topic_name))
+logging.warning("- TOPIC_NAME_OUTPUT: {}".format(topic_name_output))
+logging.warning("- TOKEN: {}".format(token))
+logging.warning("- UPLOAD_FOLDER: {}".format(upload_folder))
+logging.warning("- LABEL_TO_DETECT: {}".format(label_to_detect))
+logging.warning("- DETECTION_SCORE: {}".format(detection_score))
 
 
 file_path = 'https://storage.cloud.google.com/bpictures/DSC02531.JPG'
-storage_bucket_name = 'bpictures'
-upload_folder = 'tmp'
-looking_for_label ='Dog'
-looking_for_score = 0.85
-topic_name_output = 'identified-objects'
-project_id = 'bvisioncheck'
+
+
+MESSAGES = []
 
 def download_file(storage_bucket_name, file_path):
 
@@ -56,7 +61,7 @@ def send_message_to_pubsub(message):
 	print ("Sending message {} to topic {}".format(message, topic_name_output))
 	message = message.encode('utf-8')
 	topic_path = publisher.topic_path(project_id, topic_name_output)
-	status = publisher.publish(topic_path, message, object=looking_for_label)
+	status = publisher.publish(topic_path, message, object=label_to_detect)
 
 
 def analyze_picture(file_name):
@@ -71,27 +76,46 @@ def analyze_picture(file_name):
 	# Performs label detection on the image file
 	response = client.label_detection(image=image)
 	labels = response.label_annotations
-	print('Results of Vision AI check. Search label: {}'.format(looking_for_label))
+	print('Results of Vision AI check. Search label: {}'.format(label_to_detect))
 
 	score = 0
 	for label in labels:
 		print(label.description, round(label.score, 2))
-		if label.description == looking_for_label:
+		if label.description == label_to_detect:
 			score = label.score
 	return score
 
 
 
-def main():
-	print ("Starting Vision AI check ...")
-
-	file_name = download_file(storage_bucket_name, file_path)
-	score = analyze_picture(file_name)
+@app.route('/pubsub/push', methods=['POST'])
+def pubsub_push():
+	if (request.args.get('token', '') !=token):
+		return 'Invalid request', 400
 	
-	if score >= looking_for_score:
-		message = '{} identified on picture {} with probability {}'.format(looking_for_label, file_path, round(score, 2))
-		send_message_to_pubsub(message)
+	envelope = json.loads(request.data.decode('utf-8'))
+	payload = base64.b64decode(envelope['message']['data'])
+	logging.warning(payload)
+	MESSAGES.append(payload)
+	
+	# Returning any 2xx status indicates successful receipt of the message.
+	return 'OK', 200
+
+
+@app.route('/', methods=['GET'])
+def index():
+	return render_template('index.html', messages=MESSAGES)
+
+
+#def main():
+#	print ("Starting Vision AI check ...")
+
+#	file_name = download_file(storage_bucket_name, file_path)
+#	score = analyze_picture(file_name)
+	
+#	if score >= detection_score:
+#		message = '{} identified on picture {} with probability {}'.format(label_to_detect, file_path, round(score, 2))
+#		send_message_to_pubsub(message)
 
 
 if __name__ == "__main__":
-	main()
+	app.run(host='0.0.0.0', port=8080, debug=True)
