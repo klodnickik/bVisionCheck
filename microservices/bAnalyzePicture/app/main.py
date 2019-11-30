@@ -36,10 +36,6 @@ logging.warning("- UPLOAD_FOLDER: {}".format(upload_folder))
 logging.warning("- LABEL_TO_DETECT: {}".format(label_to_detect))
 logging.warning("- DETECTION_SCORE: {}".format(detection_score))
 
-
-file_path = 'https://storage.cloud.google.com/bpictures/DSC02531.JPG'
-
-
 MESSAGES = []
 
 def download_file(storage_bucket_name, file_path):
@@ -58,7 +54,7 @@ def download_file(storage_bucket_name, file_path):
 def send_message_to_pubsub(message):
 	publisher = pubsub_v1.PublisherClient()
 
-	print ("Sending message {} to topic {}".format(message, topic_name_output))
+	logging.warning ("Sending message {} to topic {}".format(message, topic_name_output))
 	message = message.encode('utf-8')
 	topic_path = publisher.topic_path(project_id, topic_name_output)
 	status = publisher.publish(topic_path, message, object=label_to_detect)
@@ -76,8 +72,8 @@ def analyze_picture(file_name):
 	# Performs label detection on the image file
 	response = client.label_detection(image=image)
 	labels = response.label_annotations
-	print('Results of Vision AI check. Search label: {}'.format(label_to_detect))
-
+	logging.warning('Results of Vision AI check. Search label: {}'.format(label_to_detect))
+	logging.warning(labels)
 	score = 0
 	for label in labels:
 		print(label.description, round(label.score, 2))
@@ -94,9 +90,26 @@ def pubsub_push():
 	
 	envelope = json.loads(request.data.decode('utf-8'))
 	payload = base64.b64decode(envelope['message']['data'])
-	logging.warning(payload)
 	MESSAGES.append(payload)
-	
+
+	# download file from blob
+
+	logging.warning("Downloading file {} from storage {}".format(payload, storage_bucket_name))
+	_payload = payload.decode('utf-8')
+	file_name = download_file(storage_bucket_name, _payload)
+
+	ai_score = analyze_picture(file_name)
+	if ai_score > float(detection_score):
+    		message = "Object: {} identified with probability {} on picture {}".format(label_to_detect, round(ai_score,2), file_name)
+    		send_message_to_pubsub(message)
+    		
+	# delete local copy of file
+	logging.warning ("Deleting local copy of file {}".format(file_name))
+	os.remove(file_name)
+
+
+
+
 	# Returning any 2xx status indicates successful receipt of the message.
 	return 'OK', 200
 
@@ -105,16 +118,6 @@ def pubsub_push():
 def index():
 	return render_template('index.html', messages=MESSAGES)
 
-
-#def main():
-#	print ("Starting Vision AI check ...")
-
-#	file_name = download_file(storage_bucket_name, file_path)
-#	score = analyze_picture(file_name)
-	
-#	if score >= detection_score:
-#		message = '{} identified on picture {} with probability {}'.format(label_to_detect, file_path, round(score, 2))
-#		send_message_to_pubsub(message)
 
 
 if __name__ == "__main__":
