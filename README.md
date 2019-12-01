@@ -59,6 +59,13 @@ This microservice is used to upload picture to Cloud Storage and send message to
 gcloud run deploy --image eu.gcr.io/<your-project-id>/bgetpicture:<tag> --platform managed --region europe-west1 --max-instances 2 --service-account <service-account-name> --allow-unauthenticated --set-env-vars PROJECT_ID=<project-id>,STORAGE_BUCKET_NAME=<cloud-storage-name>,TOPIC_NAME=<pub-sub-topic-name>  bgetpicture
 
 
+## Microservice bNotify
+
+Microservice created to send message to Messanger communicator
+
+https://<microservice-url>/bot - service connected to Facebook Messanger service
+https://<microservice-url>/send - service connected to PubSub, handling of push message 
+
 
 ## Change logs
 
