@@ -41,7 +41,7 @@ spec:
       steps {
         container(name: 'kaniko', shell: '/busybox/sh'){
           sh '''#!/busybox/sh -xe
-          /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --cache=true --destination=eu.gcr.io/bvisioncheck/buploadpicture:v0.1
+          /kaniko/executor -f `pwd`/microservices/bUploadPictureFromCamera/Dockerfile -c `pwd` --cache=true --destination=eu.gcr.io/bvisioncheck/buploadpicture:v0.1
           '''
         }
       }
