@@ -1,6 +1,7 @@
 ###
 credentials/
 microservices/bGetPicture-tmp/
+microservices/bUploadPictureFromCamera/tmp
 *.json
 
 # Byte-compiled / optimized / DLL files
@@ -132,3 +133,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+microservices/bUploadPictureFromCamera/k8s-deployment copy.yaml

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uploadpicture
+spec:
+  selector:
+    matchLabels:
+      app: uploadpicture
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: uploadpicture
+    spec:
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: uploadpicture-gcp-sa-key
+      containers:
+      - name: uploadpicture
+        image: eu.gcr.io/bvisioncheck/buploadpicture:<TAG>
+        volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+        env:
+        - name: IMG_URL
+          valueFrom:
+            secretKeyRef:
+              name: uploadpicture-img-url-secret
+              key: img-url
+        - name: PROJECT_ID
+          value: <PROJECT_ID>
+        - name: IMG_COMP_RESULT
+          value: "5"
+        - name: SLEEP_TIME_IN_SECONDS
+          value: "5"
+        - name: STORAGE_BUCKET_NAME
+          value: <STORAGE_NAME>
+        - name: TOPIC_NAME
+          value: <TOPIC-NAME>
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json
+      restartPolicy: Always
