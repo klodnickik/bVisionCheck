@@ -5,7 +5,7 @@ RUN adduser buploadpicture
 WORKDIR /home/buploadpicture
 
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt && pip install gunicorn
+RUN pip install -r requirements.txt
 
 RUN mkdir tmp
 
@@ -15,4 +15,4 @@ COPY buploadpicture.py ./
 RUN chown -R buploadpicture:buploadpicture ./
 USER buploadpicture
 
-ENTRYPOINT ["python nagradzacz-job.py"]
+CMD ["python3","buploadpicture.py"]

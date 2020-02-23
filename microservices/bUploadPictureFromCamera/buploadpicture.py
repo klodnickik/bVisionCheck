@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import urllib.request as req
 import imgcompare
 import logging
+import sys
 from datetime import datetime
 from google.cloud import storage
 from google.cloud import pubsub_v1
@@ -10,11 +11,11 @@ load_dotenv()
 
 # logging
 
-logging.basicConfig(filename='buploadpicture.log',
-                            filemode='a',
+logging.basicConfig(        filemode='a',
                             format='%(asctime)s,%(name)s %(levelname)s %(message)s',
                             datefmt='%m/%d %H:%M:%S',
-                            level=logging.INFO)
+                            level=logging.INFO,
+                            stream=sys.stdout)
 
 
 import os, time
@@ -99,7 +100,6 @@ def main():
     while True:
         # download and compare images
         img_comp_percentage = compare_file()
-        print (time.asctime(), "img compare result:", img_comp_percentage)
 
         # if the result of comparison meets the treshold - send file for processing
         if img_comp_percentage > IMG_COMP_RESULT:
