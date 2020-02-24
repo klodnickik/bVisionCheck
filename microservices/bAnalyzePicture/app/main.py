@@ -73,9 +73,9 @@ def analyze_picture(file_name):
 	response = client.label_detection(image=image)
 	labels = response.label_annotations
 	logging.warning('Results of Vision AI check. Search label: {}'.format(label_to_detect))
-	logging.warning(labels)
 	score = 0
 	for label in labels:
+		logging.warning(label.description, round(label.score, 2))
 		print(label.description, round(label.score, 2))
 		if label.description == label_to_detect:
 			score = label.score
