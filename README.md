@@ -84,7 +84,10 @@ https://<microservice-url>/send - service connected to PubSub, handling of push 
 - created supporitgn service bListener
  - microservice is connected to Stackdriver logs and is used to support development and tests
 
-
+### 0.3 (02/26/2020) modified notification rules
+- introduced new env (NOTIFY_ABOUT_ALL_CHECKS) which allows to decide when notification should be sent
+  - value "yes" - PubSub message to bNotify microservice is sent with every AI event. The message contain list of objectes detected on picture
+  - value "no" - PubSub message to bNotify is sent only when the object is detected (previous mode)
 
 ## Microservice bUploadPicture
 

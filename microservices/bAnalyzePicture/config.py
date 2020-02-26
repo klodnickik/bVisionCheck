@@ -12,6 +12,7 @@ class Config(object):
     LABEL_TO_DETECT = os.environ.get('LABEL_TO_DETECT')
     TOKEN = os.environ.get('TOKEN')
     STORAGE_BUCKET_NAME = os.environ.get('STORAGE_BUCKET_NAME')
+    NOTIFY_ABOUT_ALL_CHECKS = os.environ.get('NOTIFY_ABOUT_ALL_CHECKS')
     
     
     UPLOAD_FOLDER = 'tmp'
