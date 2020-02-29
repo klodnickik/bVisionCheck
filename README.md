@@ -92,5 +92,9 @@ This is local microservice which is hosted in private network with camera. The a
 and in case of identification of significant difference, upload the picture to storage bucket and send message to Pub/Sub.
 
 ### 0.6 (02/23/2020) created first version of microservice bUploadPictureFromCamera
-- created first, workign version of microservice
+- created first, working version of microservice
 - creation of deployment scripts for deployment of app into local k8s cluster (microk8s)
+
+### 0.7 (02/29/2020)
+- implemented Stackdriver logging
+- removed not needed variables
