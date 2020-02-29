@@ -22,6 +22,7 @@ topic_name_output = app.config['TOPIC_NAME_OUTPUT']
 token = app.config['TOKEN']
 upload_folder = app.config['UPLOAD_FOLDER']
 label_to_detect = app.config['LABEL_TO_DETECT']
+notify_about_all_checks = app.config['NOTIFY_ABOUT_ALL_CHECKS']
 detection_score = float(app.config['DETECTION_SCORE'])
 
 ## send configuration to logs
@@ -73,13 +74,16 @@ def analyze_picture(file_name):
 	response = client.label_detection(image=image)
 	labels = response.label_annotations
 	logging.warning('Results of Vision AI check. Search label: {}'.format(label_to_detect))
-	logging.warning(labels)
 	score = 0
+	other_objects = ""
 	for label in labels:
+
+		other_objects = other_objects + label.description + "(" + str(round(label.score, 2)) + "), "
 		print(label.description, round(label.score, 2))
+
 		if label.description == label_to_detect:
 			score = label.score
-	return score
+	return score, other_objects
 
 
 
@@ -98,10 +102,17 @@ def pubsub_push():
 	_payload = payload.decode('utf-8')
 	file_name = download_file(storage_bucket_name, _payload)
 
-	ai_score = analyze_picture(file_name)
+	ai_score = analyze_picture(file_name)[0]
+	other_objects = analyze_picture(file_name)[1]
+
 	if ai_score > float(detection_score):
     		message = "Object: {} identified with probability {} on picture {}".format(label_to_detect, round(ai_score,2), file_name)
     		send_message_to_pubsub(message)
+	else:
+		if notify_about_all_checks == "yes":
+			message = "Object: {} not detected. Other objects are {}. Picture {}".format(label_to_detect, other_objects, file_name)
+			send_message_to_pubsub(message)
+
     		
 	# delete local copy of file
 	logging.warning ("Deleting local copy of file {}".format(file_name))
