@@ -25,8 +25,12 @@ debug_level = os.environ.get('DEBUG_LEVEL')
 
 # Stackdriver logging configuration
 client = google.cloud.logging.Client()
-handler = CloudLoggingHandler(client,name="buploadpicture")
-cloud_logger = logging.getLogger('cloudLogger')
+#handler = CloudLoggingHandler(client,name="buploadpicture")
+#cloud_logger = logging.getLogger('cloudLogger')
+
+handler = client.get_default_handler()
+cloud_logger = logging.getLogger("cloudLogger")
+
 
 # debug level configuration
 if (debug_level=="DEBUG"):
