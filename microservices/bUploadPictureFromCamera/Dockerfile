@@ -1,4 +1,5 @@
 FROM python:3.7-slim
+RUN get-apt update && get-apt upgrade -y
 
 RUN adduser buploadpicture
 
