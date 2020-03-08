@@ -61,15 +61,15 @@ def download_file(storage_bucket_name, file_path):
 	bucket = storage_client.get_bucket(storage_bucket_name)
 	blob = bucket.blob(file_name)
 	blob.download_to_filename(upload_folder + '/' + file_name)
-	return (upload_folder + '/' + file_name)
+	return (upload_folder + '/' + file_name), file_name, storage_bucket_name
 
-def send_message_to_pubsub(message, file_name):
+def send_message_to_pubsub(message, file_name, storage_bucket_name):
 	publisher = pubsub_v1.PublisherClient()
 
 	logging.warning ("PubSub: {} to topic: {}".format(message, topic_name_output))
 	message = message.encode('utf-8')
 	topic_path = publisher.topic_path(project_id, topic_name_output)
-	status = publisher.publish(topic_path, message, object=label_to_detect, file_name=file_name)
+	status = publisher.publish(topic_path, message, object=label_to_detect, file_name=file_name, storage_bucket_name=storage_bucket_name)
 
 
 def analyze_picture(file_name):
@@ -111,18 +111,20 @@ def pubsub_push():
 
 	logging.debug("Downloading file {} from storage {}".format(payload, storage_bucket_name))
 	_payload = payload.decode('utf-8')
-	file_name = download_file(storage_bucket_name, _payload)
+	_file_name = download_file(storage_bucket_name, _payload)
+	file_name = _file_name[0]
+	file_name_wo_folder = _file_name[1]
 
 	ai_score = analyze_picture(file_name)[0]
 	other_objects = analyze_picture(file_name)[1]
 
 	if ai_score > float(detection_score):
     		message = "Object: {} identified with probability {} on picture {}".format(label_to_detect, round(ai_score,2), file_name)
-    		send_message_to_pubsub(message, file_name)
+    		send_message_to_pubsub(message, file_name_wo_folder, storage_bucket_name)
 	else:
 		if notify_about_all_checks == "yes":
 			message = "Object: {} not detected. Other objects are {}. Picture {}".format(label_to_detect, other_objects, file_name)
-			send_message_to_pubsub(message, file_name)
+			send_message_to_pubsub(message, file_name_wo_folder, storage_bucket_name)
 
     		
 	# delete local copy of file
