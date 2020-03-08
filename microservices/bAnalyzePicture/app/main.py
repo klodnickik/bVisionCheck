@@ -24,20 +24,31 @@ upload_folder = app.config['UPLOAD_FOLDER']
 label_to_detect = app.config['LABEL_TO_DETECT']
 notify_about_all_checks = app.config['NOTIFY_ABOUT_ALL_CHECKS']
 detection_score = float(app.config['DETECTION_SCORE'])
+debug_level = os.environ.get('DEBUG_LEVEL')
 
 ## send configuration to logs
 
 logging.warning("vAnalyzePicture starting ... variable values")
-logging.warning("- PROJECT_ID: {}".format(project_id))
-logging.warning("- STORAGE_BUCKET_NAME: {}".format(storage_bucket_name))
-logging.warning("- TOPIC_NAME: {}".format(topic_name))
-logging.warning("- TOPIC_NAME_OUTPUT: {}".format(topic_name_output))
-logging.warning("- TOKEN: {}".format(token))
-logging.warning("- UPLOAD_FOLDER: {}".format(upload_folder))
-logging.warning("- LABEL_TO_DETECT: {}".format(label_to_detect))
-logging.warning("- DETECTION_SCORE: {}".format(detection_score))
+logging.info("PROJECT_ID: {}".format(project_id))
+logging.info("STORAGE_BUCKET_NAME: {}".format(storage_bucket_name))
+logging.info("TOPIC_NAME: {}".format(topic_name))
+logging.info("TOPIC_NAME_OUTPUT: {}".format(topic_name_output))
+logging.info("TOKEN: {}".format(token))
+logging.info("UPLOAD_FOLDER: {}".format(upload_folder))
+logging.info("LABEL_TO_DETECT: {}".format(label_to_detect))
+logging.info("DETECTION_SCORE: {}".format(detection_score))
+logging.info("DEBUG_LEVEL: {}".format(debug_level))
 
 MESSAGES = []
+
+# debug level configuration
+if (debug_level=="DEBUG"):
+    client.setup_logging(log_level=logging.DEBUG)
+elif (debug_level=="INFO"):
+    client.setup_logging(log_level=logging.INFO)
+else:
+    client.setup_logging(log_level=logging.WARNING)
+
 
 def download_file(storage_bucket_name, file_path):
 
@@ -45,20 +56,20 @@ def download_file(storage_bucket_name, file_path):
 	_file_path = file_path.split('/')
 	file_name = _file_path[-1]
 
-	print ("Downloading file {} from blob {}".format(file_name, storage_bucket_name))
+	logging.debug ("Downloading file {} from blob {}".format(file_name, storage_bucket_name))
 	storage_client = storage.Client()
 	bucket = storage_client.get_bucket(storage_bucket_name)
 	blob = bucket.blob(file_name)
 	blob.download_to_filename(upload_folder + '/' + file_name)
 	return (upload_folder + '/' + file_name)
 
-def send_message_to_pubsub(message):
+def send_message_to_pubsub(message, file_name):
 	publisher = pubsub_v1.PublisherClient()
 
-	logging.warning ("Sending message {} to topic {}".format(message, topic_name_output))
+	logging.warning ("PubSub: {} to topic: {}".format(message, topic_name_output))
 	message = message.encode('utf-8')
 	topic_path = publisher.topic_path(project_id, topic_name_output)
-	status = publisher.publish(topic_path, message, object=label_to_detect)
+	status = publisher.publish(topic_path, message, object=label_to_detect, file_name=file_name)
 
 
 def analyze_picture(file_name):
@@ -73,7 +84,7 @@ def analyze_picture(file_name):
 	# Performs label detection on the image file
 	response = client.label_detection(image=image)
 	labels = response.label_annotations
-	logging.warning('Results of Vision AI check. Search label: {}'.format(label_to_detect))
+	logging.info('Results of Vision AI check. Search label: {}'.format(label_to_detect))
 	score = 0
 	other_objects = ""
 	for label in labels:
@@ -98,7 +109,7 @@ def pubsub_push():
 
 	# download file from blob
 
-	logging.warning("Downloading file {} from storage {}".format(payload, storage_bucket_name))
+	logging.debug("Downloading file {} from storage {}".format(payload, storage_bucket_name))
 	_payload = payload.decode('utf-8')
 	file_name = download_file(storage_bucket_name, _payload)
 
@@ -107,15 +118,15 @@ def pubsub_push():
 
 	if ai_score > float(detection_score):
     		message = "Object: {} identified with probability {} on picture {}".format(label_to_detect, round(ai_score,2), file_name)
-    		send_message_to_pubsub(message)
+    		send_message_to_pubsub(message, file_name)
 	else:
 		if notify_about_all_checks == "yes":
 			message = "Object: {} not detected. Other objects are {}. Picture {}".format(label_to_detect, other_objects, file_name)
-			send_message_to_pubsub(message)
+			send_message_to_pubsub(message, file_name)
 
     		
 	# delete local copy of file
-	logging.warning ("Deleting local copy of file {}".format(file_name))
+	logging.debug ("Deleting local copy of file {}".format(file_name))
 	os.remove(file_name)
 
 

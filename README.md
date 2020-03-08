@@ -84,10 +84,6 @@ https://<microservice-url>/send - service connected to PubSub, handling of push 
 - created supporitgn service bListener
  - microservice is connected to Stackdriver logs and is used to support development and tests
 
-### 0.3 (02/26/2020) modified notification rules
-- introduced new env (NOTIFY_ABOUT_ALL_CHECKS) which allows to decide when notification should be sent
-  - value "yes" - PubSub message to bNotify microservice is sent with every AI event. The message contain list of objectes detected on picture
-  - value "no" - PubSub message to bNotify is sent only when the object is detected (previous mode)
 
 ## Microservice bUploadPicture
 
@@ -101,3 +97,20 @@ and in case of identification of significant difference, upload the picture to s
 ### 0.7 (02/29/2020)
 - implemented Stackdriver logging
 - removed not needed variables
+
+
+
+## Microservice bUploadPicture
+This is microservice which analyze picture using Google AI. The trigger is Pub/Sub push message. As a result, the job upload the picture, send to AI and depends on cofiguration, send or not PubSub message to bNotify topic.
+
+## Change logs
+
+### 0.3 (02/26/2020) modified notification rules
+- introduced new env (NOTIFY_ABOUT_ALL_CHECKS) which allows to decide when notification should be sent
+  - value "yes" - PubSub message to bNotify microservice is sent with every AI event. The message contain list of objectes detected on picture
+  - value "no" - PubSub message to bNotify is sent only when the object is detected (previous mode)
+
+### 04. (03/08/2020) modified logging
+- introduce loggin level (DEBUG_LEVEL values: DEBUG, INFO or WARNING)
+- modify logging levels and messages
+- updated Docker file (reduce number of workers, update of packages with Docker build)

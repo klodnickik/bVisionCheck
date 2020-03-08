@@ -13,7 +13,7 @@ class Config(object):
     TOKEN = os.environ.get('TOKEN')
     STORAGE_BUCKET_NAME = os.environ.get('STORAGE_BUCKET_NAME')
     NOTIFY_ABOUT_ALL_CHECKS = os.environ.get('NOTIFY_ABOUT_ALL_CHECKS')
-    
+    DEBUG_LEVEL = os.environ.get('DEBUG_LEVEL')
     
     UPLOAD_FOLDER = 'tmp'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
