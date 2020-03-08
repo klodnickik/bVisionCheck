@@ -1,4 +1,5 @@
 FROM python:3.7-slim
+RUN apt-get update && apt-get upgrade -y
 
 RUN adduser bnotify
 
@@ -21,4 +22,4 @@ USER bnotify
 
 EXPOSE 8080
 
-CMD exec gunicorn --bind :8080 --workers 1 --threads 8 bnotify:app
+CMD exec gunicorn --bind :8080 --workers 1 bnotify:app

@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+  <title>Pub/Sub Python on Google App Engine Flexible Environment</title>
+</head>
+<body>
+<div>
+  <p>Messages received by this instance:</p>
+  <ul>
+    {% for message in messages: %}
+      <li>{{message}}</li>
+    {% endfor %}
+  </ul>
+  <p><small>Note: because your application is likely running multiple instances, each instance will have a different list of messages.</small></p>
+</div>
+
+</body>
+</html>

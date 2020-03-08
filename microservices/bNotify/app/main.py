@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, redirect, render_template
 from pymessenger.bot import Bot
 from app import app
 import logging
@@ -12,14 +12,15 @@ token = app.config['TOKEN']
 
 recipient_id = '2866397626725399'
 
+MESSAGES = []
 
 bot = Bot(access_token)
 
 buttons = []
 
-@app.route("/")
-def hello():
-    return "<h1 style='color:blue'>Hello There!</h1>"
+@app.route('/', methods=['GET'])
+def index():
+	return render_template('index.html', messages=MESSAGES)
 
 @app.route("/bot", methods=['GET', 'POST'])
 def receive_message():
@@ -80,7 +81,14 @@ def pubsub_push():
     payload = base64.b64decode(envelope['message']['data'])
     _payload = payload.decode('utf-8')
 
-    logging.warning ("Recieved message from pubsub: {}".format(_payload))
+    file_name = envelope['message']['attributes']['file_name']
+    object_name = envelope['message']['attributes']['object']
+    storage_bucket_name = envelope['message']['attributes']['storage_bucket_name']
+
+    MESSAGES.append(_payload)
+
+    logging.warning ("Recieved message from PubSub: {}".format(_payload))
+    logging.warning ("Object: {}, file: {}, storage_bucket_name: {}".format(object_name, file_name, storage_bucket_name))
 
     # send message
 
